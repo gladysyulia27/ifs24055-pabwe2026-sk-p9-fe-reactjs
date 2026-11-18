@@ -68,9 +68,11 @@ export default function App() {
     }
   }
 
+  const isPublicPath = path === '/' || path === '/public' || path === '/articles'
+
   useEffect(() => {
-    if (path === '/' || path === '/public') loadPublic()
-  }, [path, query, category])
+    if (isPublicPath) loadPublic()
+  }, [isPublicPath, query, category])
 
   async function loadAuthor() {
     try {
@@ -101,7 +103,7 @@ export default function App() {
   }, [path, token, user?.role])
 
   useEffect(() => {
-    if (!path.startsWith('/posts/')) {
+    if (!path.startsWith('/posts/') && !path.startsWith('/articles/')) {
       setDetail(null)
       return
     }
@@ -266,7 +268,7 @@ export default function App() {
     )
   }
 
-  const publicDetail = path.startsWith('/posts/')
+  const publicDetail = path.startsWith('/posts/') || path.startsWith('/articles/')
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -354,7 +356,7 @@ export default function App() {
           </div>
         </main>
       )}
-      {path === '/' || path === '/public' ? (
+      {isPublicPath ? (
         <PublicArticleList
           posts={posts}
           loading={loading}

@@ -622,12 +622,24 @@ describe('Delcom Blog SPA (App.jsx)', () => {
     fireEvent.click(screen.getByText('Artikel Dua'))
     await waitFor(() => expect(screen.getByText('2 menit membaca')).toBeInTheDocument())
 
-    // Navigate via popstate to /public and /posts/tidak-ada and /posts/
+    // Navigate via popstate to /public, /articles, /articles/artikel-satu, /posts/tidak-ada and /posts/
     act(() => {
       history.pushState({}, '', '/public')
       window.dispatchEvent(new PopStateEvent('popstate'))
     })
     await waitFor(() => expect(screen.getByText('Jelajahi artikel')).toBeInTheDocument())
+
+    act(() => {
+      history.pushState({}, '', '/articles')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    await waitFor(() => expect(screen.getByText('Jelajahi artikel')).toBeInTheDocument())
+
+    act(() => {
+      history.pushState({}, '', '/articles/artikel-satu')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    await waitFor(() => expect(screen.getByText('3 menit membaca')).toBeInTheDocument())
 
     act(() => {
       history.pushState({}, '', '/posts/tidak-ada')
