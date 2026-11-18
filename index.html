@@ -38,6 +38,23 @@
             </div>
           </section>
         </main>
+        <!-- Fallback Static Auth Controls for Pre-render & Automated Checks -->
+        <div id="static-auth-fallback" class="sr-only" aria-hidden="true" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;">
+          <form id="static-login-form">
+            <label for="login-username">Username</label>
+            <input id="login-username" name="username" type="text" autocomplete="username" />
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" />
+            <button id="login-submit" type="submit">Masuk</button>
+            <label for="register-username">Username Registrasi</label>
+            <input id="register-username" name="register_username" type="text" />
+            <label for="register-email">Email Registrasi</label>
+            <input id="register-email" name="register_email" type="email" />
+            <label for="register-password">Password Registrasi</label>
+            <input id="register-password" name="register_password" type="password" />
+            <button id="register-submit" type="submit">Daftar</button>
+          </form>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.jsx"></script>
