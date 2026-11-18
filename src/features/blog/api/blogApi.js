@@ -1,0 +1,10 @@
+import { apiRequest } from '../../../helpers/apiHelper'
+export const getPublicPosts = (query = '', category = 'Semua') => apiRequest(`/public/posts?q=${encodeURIComponent(query)}&category=${encodeURIComponent(category)}`)
+export const getPublicPost = (slug) => apiRequest(`/public/posts/${encodeURIComponent(slug)}`)
+export const getMyPosts = (token) => apiRequest('/posts', { token })
+export const getPostStats = (token) => apiRequest('/posts/stats', { token })
+export const createPost = (body, token) => apiRequest('/posts', { method: 'POST', body, token })
+export const updatePost = (id, body, token) => apiRequest(`/posts/${id}`, { method: 'PUT', body, token })
+export const deletePost = (id, token) => apiRequest(`/posts/${id}`, { method: 'DELETE', token })
+export const togglePostPublication = (id, token) => apiRequest(`/posts/${id}/toggle-publish`, { method: 'PATCH', token })
+export const generateArticle = (body, token) => apiRequest('/posts/ai-generate', { method: 'POST', body, token })
