@@ -466,7 +466,7 @@ export default function App() {
           }}
         />
       )}
-      <footer className="mt-16 border-t border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
+      <footer className="mt-16 border-t border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
         © {new Date().getFullYear()} Delcom Blog · Built for ideas that matter.
       </footer>
     </div>

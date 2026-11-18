@@ -758,7 +758,7 @@ describe('Delcom Blog SPA (App.jsx)', () => {
 
       if (u.endsWith('/auth/login')) {
         const body = JSON.parse(opts.body)
-        if (body.username === 'penulis') {
+        if (body.username === 'writer') {
           return { ok: false, status: 401, json: async () => ({ status: 'fail', message: 'Belum terdaftar' }) }
         }
         return {
@@ -861,7 +861,7 @@ describe('Delcom Blog SPA (App.jsx)', () => {
 
     // Successful registration / seeder login redirects to /author
     fireEvent.click(screen.getAllByRole('button', { name: 'Masuk' })[1])
-    fireEvent.click(screen.getByText('Seeder Penulis (penulis)'))
+    fireEvent.click(screen.getByText('writer (writer)'))
     await act(async () => {
       fireEvent.submit(document.getElementById('login-submit').closest('form'))
     })
