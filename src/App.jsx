@@ -9,11 +9,11 @@ import AiPostGeneratorModal from './features/blog/modals/AiPostGeneratorModal'
 
 function Field({ label, ...props }) {
   return (
-    <label className="grid gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-200">
+    <label className="grid gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
       {label}
       <input
         {...props}
-        className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900"
+        className="rounded-xl border border-slate-300 bg-white px-3.5 py-3 font-normal text-slate-900 placeholder:text-slate-400 shadow-xs outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
       />
     </label>
   )
@@ -68,7 +68,8 @@ export default function App() {
     }
   }
 
-  const isPublicPath = path === '/' || path === '/public' || path === '/articles'
+  const isPublicPath =
+    path === '/' || path === '/public' || path === '/articles' || path === '/article'
 
   useEffect(() => {
     if (isPublicPath) loadPublic()
@@ -102,8 +103,11 @@ export default function App() {
     if (path === '/admin' && token && user?.role !== 'admin') go('/author')
   }, [path, token, user?.role])
 
+  const publicDetail =
+    path.startsWith('/posts/') || path.startsWith('/articles/') || path.startsWith('/article/')
+
   useEffect(() => {
-    if (!path.startsWith('/posts/') && !path.startsWith('/articles/')) {
+    if (!publicDetail) {
       setDetail(null)
       return
     }
@@ -120,7 +124,7 @@ export default function App() {
     return () => {
       active = false
     }
-  }, [path])
+  }, [path, publicDetail])
 
   function logout() {
     localStorage.removeItem('delcom_token')
@@ -187,12 +191,12 @@ export default function App() {
 
   if (isAuth) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
         {nav}
         <div className="mx-auto grid max-w-5xl gap-10 px-5 py-16 md:grid-cols-2">
-          <div className="hidden rounded-3xl bg-gradient-to-br from-indigo-700 to-slate-950 p-10 text-white md:block">
+          <div className="hidden rounded-3xl bg-gradient-to-br from-indigo-700 to-slate-950 p-10 text-white shadow-xl md:block">
             <p className="text-sm font-bold uppercase tracking-widest text-indigo-200">Delcom Blog</p>
-            <h1 className="mt-10 text-5xl font-black leading-tight">
+            <h1 className="mt-10 text-5xl font-black leading-tight text-white">
               Ideas deserve
               <br />
               to be <span className="text-indigo-300">published.</span>
@@ -206,14 +210,14 @@ export default function App() {
               e.preventDefault()
               auth(path === '/register' ? 'register' : 'login')
             }}
-            className="my-auto grid gap-5"
+            className="my-auto grid gap-5 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
             <div>
-              <p className="text-sm font-semibold text-indigo-600">SELAMAT DATANG</p>
-              <h2 className="mt-2 text-3xl font-black">
+              <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">SELAMAT DATANG</p>
+              <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">
                 {path === '/register' ? 'Buat akun penulis' : 'Masuk ke akun'}
               </h2>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                 {path === '/register'
                   ? 'Mulai bagikan tulisan terbaikmu.'
                   : 'Lanjutkan mengelola dan menerbitkan artikel.'}
@@ -247,17 +251,18 @@ export default function App() {
               placeholder="Minimal 6 karakter"
             />
             <button
+              type="submit"
               id={path === '/login' ? 'login-submit' : undefined}
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+              className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
             >
               {path === '/register' ? 'Daftar akun' : 'Masuk'}
             </button>
-            <p className="text-center text-sm text-slate-500">
+            <p className="text-center text-sm text-slate-600 dark:text-slate-400">
               {path === '/register' ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
               <button
                 type="button"
                 onClick={() => go(path === '/register' ? '/login' : '/register')}
-                className="font-bold text-indigo-600"
+                className="font-bold text-indigo-600 hover:underline dark:text-indigo-400"
               >
                 {path === '/register' ? 'Masuk' : 'Daftar'}
               </button>
@@ -268,10 +273,8 @@ export default function App() {
     )
   }
 
-  const publicDetail = path.startsWith('/posts/') || path.startsWith('/articles/')
-
   return (
-    <div className="min-h-screen bg-[#f8f9fc] text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen bg-[#f8f9fc] text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       {nav}
       {path === '/author' && (
         <AuthorDashboard
@@ -291,30 +294,32 @@ export default function App() {
         />
       )}
       {path === '/admin' && (
-        <main className="mx-auto max-w-7xl px-5 py-10">
-          <p className="text-sm font-bold text-indigo-600">ADMINISTRATION</p>
-          <h1 className="mt-2 text-3xl font-black">System overview</h1>
-          <p className="mb-8 mt-1 text-sm text-slate-500">
+        <main className="mx-auto max-w-7xl px-5 py-10 text-slate-900 dark:text-slate-100">
+          <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">ADMINISTRATION</p>
+          <h1 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">System overview</h1>
+          <p className="mb-8 mt-1 text-sm text-slate-600 dark:text-slate-400">
             Monitoring pengguna dan seluruh publikasi Delcom Blog.
           </p>
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl bg-indigo-700 p-6 text-white">
+            <div className="rounded-2xl bg-indigo-700 p-6 text-white shadow-sm">
               <p className="text-sm text-indigo-200">Total pengguna</p>
               <b className="mt-2 block text-4xl">{users.length}</b>
             </div>
-            <div className="rounded-2xl border bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-sm text-slate-500">Total artikel</p>
-              <b className="mt-2 block text-4xl">{adminPosts.length}</b>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <p className="text-sm text-slate-600 dark:text-slate-400">Total artikel</p>
+              <b className="mt-2 block text-4xl text-slate-900 dark:text-white">{adminPosts.length}</b>
             </div>
-            <div className="rounded-2xl border bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-              <p className="text-sm text-slate-500">Artikel terbit</p>
-              <b className="mt-2 block text-4xl">{adminPosts.filter((p) => p.is_published).length}</b>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <p className="text-sm text-slate-600 dark:text-slate-400">Artikel terbit</p>
+              <b className="mt-2 block text-4xl text-slate-900 dark:text-white">
+                {adminPosts.filter((p) => p.is_published).length}
+              </b>
             </div>
           </div>
-          <h2 className="mb-3 mt-10 font-bold">Direktori pengguna</h2>
-          <div className="overflow-x-auto rounded-2xl border bg-white dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="mb-3 mt-10 font-bold text-slate-900 dark:text-white">Direktori pengguna</h2>
+          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500 dark:bg-slate-800">
+              <thead className="bg-slate-50 text-xs uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                 <tr>
                   {['ID', 'Pengguna', 'Email', 'Role', 'Artikel', 'Terbit'].map((x) => (
                     <th key={x} className="p-4">
@@ -325,10 +330,10 @@ export default function App() {
               </thead>
               <tbody>
                 {users.map((u) => (
-                  <tr key={u.id} className="border-t dark:border-slate-800">
+                  <tr key={u.id} className="border-t border-slate-200 dark:border-slate-800">
                     <td className="p-4">{u.id}</td>
-                    <td className="p-4 font-semibold">{u.username}</td>
-                    <td className="p-4">{u.email}</td>
+                    <td className="p-4 font-semibold text-slate-900 dark:text-white">{u.username}</td>
+                    <td className="p-4 text-slate-600 dark:text-slate-300">{u.email}</td>
                     <td className="p-4">{u.role}</td>
                     <td className="p-4">{u.total_posts}</td>
                     <td className="p-4">{u.published_posts}</td>
@@ -337,20 +342,28 @@ export default function App() {
               </tbody>
             </table>
           </div>
-          <h2 className="mb-3 mt-10 font-bold">Arsip semua artikel</h2>
+          <h2 className="mb-3 mt-10 font-bold text-slate-900 dark:text-white">Arsip semua artikel</h2>
           <div className="grid gap-3">
             {adminPosts.map((p) => (
               <div
                 key={p.id}
-                className="flex justify-between rounded-xl border bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900"
               >
                 <div>
-                  <b>{p.title}</b>
-                  <p className="text-xs text-slate-500">
+                  <b className="text-slate-900 dark:text-white">{p.title}</b>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     {p.author?.username} · {p.category}
                   </p>
                 </div>
-                <span className="text-xs">{p.is_published ? 'Terbit' : 'Draf'}</span>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                    p.is_published
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                      : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                  }`}
+                >
+                  {p.is_published ? 'Terbit' : 'Draf'}
+                </span>
               </div>
             ))}
           </div>
@@ -399,7 +412,7 @@ export default function App() {
           }}
         />
       )}
-      <footer className="mt-16 border-t border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-400 dark:border-slate-800 dark:bg-slate-950">
+      <footer className="mt-16 border-t border-slate-200 bg-white px-5 py-10 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
         © {new Date().getFullYear()} Delcom Blog · Built for ideas that matter.
       </footer>
     </div>
