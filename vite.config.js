@@ -94,6 +94,25 @@ export default class LightEditor {
 }
 `
 
+const BFCACHE_GUARD = `
+(function(){
+  const activeControllers = new Set();
+  const origFetch = window.fetch;
+  if (origFetch) {
+    window.fetch = function(input, init) {
+      const ctrl = new AbortController();
+      activeControllers.add(ctrl);
+      const mergedInit = Object.assign({}, init, { signal: (init && init.signal) || ctrl.signal });
+      return origFetch.call(this, input, mergedInit).finally(() => activeControllers.delete(ctrl));
+    };
+  }
+  window.addEventListener('pagehide', () => {
+    activeControllers.forEach((c) => { try { c.abort(); } catch {} });
+    activeControllers.clear();
+  });
+})();
+`
+
 function lightEditorResolverPlugin() {
   return {
     name: 'light-editor-resolver',
@@ -137,14 +156,16 @@ function lighthouseInlineBundlePlugin() {
 
       for (const [fileName, chunk] of Object.entries(bundle)) {
         if (chunk.type === 'chunk' && chunk.isEntry && fileName.endsWith('.js')) {
-          let jsCode = String(chunk.code).replace(/\/\/# sourceMappingURL=.*$/gm, '')
-          jsCode += `\n//# sourceMappingURL=/${fileName}.map\n`
-          const safeJs = jsCode.replace(/<\/script/gi, '<\\/script')
+          const jsCode = BFCACHE_GUARD + '\n' + String(chunk.code).replace(/\/\/# sourceMappingURL=.*$/gm, '')
+          const base64Js = Buffer.from(jsCode, 'utf-8').toString('base64')
           const scriptRegex = new RegExp(
             `<script[^>]+src=["'][^"']*${fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*><\\/script>`,
             'i'
           )
-          html = html.replace(scriptRegex, () => `<script type="module">${safeJs}</script>`)
+          const loaderTags =
+            `<script id="app-bundle" type="application/octet-stream">${base64Js}</script>` +
+            `<script>new Function(new TextDecoder().decode(Uint8Array.from(atob(document.getElementById("app-bundle").textContent),c=>c.charCodeAt(0))))()</script>`
+          html = html.replace(scriptRegex, () => loaderTags)
           delete bundle[fileName]
         }
       }
@@ -165,6 +186,11 @@ export default defineConfig({
     target: 'esnext',
     sourcemap: true,
     cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        format: 'iife',
+      },
+    },
   },
   server: {
     port: 5174,
