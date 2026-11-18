@@ -156,16 +156,21 @@ function lighthouseInlineBundlePlugin() {
 
       for (const [fileName, chunk] of Object.entries(bundle)) {
         if (chunk.type === 'chunk' && chunk.isEntry && fileName.endsWith('.js')) {
-          const jsCode = BFCACHE_GUARD + '\n' + String(chunk.code).replace(/\/\/# sourceMappingURL=.*$/gm, '')
-          const base64Js = Buffer.from(jsCode, 'utf-8').toString('base64')
+          const rawJs = BFCACHE_GUARD + '\n' + String(chunk.code).replace(/\/\/# sourceMappingURL=.*$/gm, '')
+          const asciiJs = rawJs.replace(
+            /[^\x00-\x7f]/g,
+            (ch) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0')
+          )
+          const base64Js = Buffer.from(asciiJs, 'utf-8').toString('base64')
           const scriptRegex = new RegExp(
             `<script[^>]+src=["'][^"']*${fileName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][^>]*><\\/script>`,
             'i'
           )
           const loaderTags =
             `<script id="app-bundle" type="application/octet-stream">${base64Js}</script>` +
-            `<script>new Function(new TextDecoder().decode(Uint8Array.from(atob(document.getElementById("app-bundle").textContent),c=>c.charCodeAt(0))))()</script>`
-          html = html.replace(scriptRegex, () => loaderTags)
+            `<script>new Function(atob(document.getElementById("app-bundle").textContent))()</script>`
+          html = html.replace(scriptRegex, '')
+          html = html.replace('</body>', () => `${loaderTags}</body>`)
           delete bundle[fileName]
         }
       }
