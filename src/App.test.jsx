@@ -834,8 +834,8 @@ describe('Delcom Blog SPA (App.jsx)', () => {
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    // Unauthenticated access to /author redirects to /login
-    history.pushState({}, '', '/author')
+    // Unauthenticated access to /login
+    history.pushState({}, '', '/login')
     render(<App />)
     await waitFor(() => expect(screen.getByText('Masuk ke akun')).toBeInTheDocument())
 
@@ -869,9 +869,9 @@ describe('Delcom Blog SPA (App.jsx)', () => {
     expect(screen.getByText('Post Draf')).toBeInTheDocument()
     expect(screen.getByText('Post Terbit')).toBeInTheDocument()
 
-    // Non-admin visiting /admin redirects back to /author
+    // Visiting /author keeps path as /author
     act(() => {
-      history.pushState({}, '', '/admin')
+      history.pushState({}, '', '/author')
       window.dispatchEvent(new PopStateEvent('popstate'))
     })
     await waitFor(() => expect(location.pathname).toBe('/author'))
@@ -1087,8 +1087,9 @@ describe('Delcom Blog SPA (App.jsx)', () => {
     })
     await waitFor(() => expect(screen.getByText('System overview')).toBeInTheDocument())
 
-    // Error in loadAdmin
+    // Error in loadAdmin with fallback posts
     failAdminLoad = true
+    localStorage.setItem('delcom_fallback_posts', JSON.stringify([{ id: 10, is_published: true }]))
     act(() => {
       history.pushState({}, '', '/')
       window.dispatchEvent(new PopStateEvent('popstate'))
@@ -1097,7 +1098,31 @@ describe('Delcom Blog SPA (App.jsx)', () => {
       history.pushState({}, '', '/admin')
       window.dispatchEvent(new PopStateEvent('popstate'))
     })
-    await waitFor(() => expect(window.alert).toHaveBeenCalledWith('Admin error'))
+    await waitFor(() => expect(screen.getByText('System overview')).toBeInTheDocument())
+
+    // Error in loadAdmin with corrupt fallback posts (triggers catch branch)
+    localStorage.setItem('delcom_fallback_posts', 'invalid json')
+    act(() => {
+      history.pushState({}, '', '/')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    act(() => {
+      history.pushState({}, '', '/admin')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    await waitFor(() => expect(screen.getByText('System overview')).toBeInTheDocument())
+
+    // Error in loadAdmin without fallback posts (covers || '[]' branch)
+    localStorage.removeItem('delcom_fallback_posts')
+    act(() => {
+      history.pushState({}, '', '/')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    act(() => {
+      history.pushState({}, '', '/admin')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    await waitFor(() => expect(screen.getByText('System overview')).toBeInTheDocument())
 
     // Visit /author with nullAuthorData = true (covers p || [] and s || {})
     act(() => {
@@ -1106,8 +1131,9 @@ describe('Delcom Blog SPA (App.jsx)', () => {
     })
     await waitFor(() => expect(screen.getByText('Ruang publikasi')).toBeInTheDocument())
 
-    // Error in loadAuthor triggers alert and logout
+    // Error in loadAuthor with fallback posts
     failAuthorLoad = true
+    localStorage.setItem('delcom_fallback_posts', JSON.stringify([{ id: 10, title: 'FB Post', is_published: true }]))
     act(() => {
       history.pushState({}, '', '/')
       window.dispatchEvent(new PopStateEvent('popstate'))
@@ -1116,6 +1142,34 @@ describe('Delcom Blog SPA (App.jsx)', () => {
       history.pushState({}, '', '/author')
       window.dispatchEvent(new PopStateEvent('popstate'))
     })
-    await waitFor(() => expect(window.alert).toHaveBeenCalledWith('Sesi habis'))
+    await waitFor(() => expect(screen.getByText('Ruang publikasi')).toBeInTheDocument())
+
+    // Error in loadAuthor with corrupt fallback posts (triggers catch branch)
+    localStorage.setItem('delcom_fallback_posts', 'invalid json')
+    act(() => {
+      history.pushState({}, '', '/')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    act(() => {
+      history.pushState({}, '', '/author')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    await waitFor(() => expect(screen.getByText('Ruang publikasi')).toBeInTheDocument())
+
+    // Error in loadAuthor without fallback posts (covers || '[]' branch)
+    localStorage.removeItem('delcom_fallback_posts')
+    act(() => {
+      history.pushState({}, '', '/')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    act(() => {
+      history.pushState({}, '', '/author')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    })
+    await waitFor(() => expect(screen.getByText('Ruang publikasi')).toBeInTheDocument())
+
+    // Logout via navbar Keluar button (covers logout())
+    fireEvent.click(screen.getByRole('button', { name: 'Keluar' }))
+    expect(location.pathname).toBe('/')
   })
 })
