@@ -622,15 +622,15 @@ describe('Delcom Blog SPA (App.jsx)', () => {
     fireEvent.click(screen.getByText('Artikel Dua'))
     await waitFor(() => expect(screen.getByText('2 menit membaca')).toBeInTheDocument())
 
-    // Navigate via popstate to /public, /articles, /article, /articles/artikel-satu, /article/artikel-satu, /posts/tidak-ada and /posts/
+    // Navigate via popstate to /public, /articles/, /article, /articles/artikel-satu, /article/artikel-satu, and /posts/tidak-ada
     act(() => {
       history.pushState({}, '', '/public')
       window.dispatchEvent(new PopStateEvent('popstate'))
     })
-    await waitFor(() => expect(screen.getByText('Jelajahi artikel')).toBeInTheDocument())
+    await waitFor(() => expect(location.pathname).toBe('/public'))
 
     act(() => {
-      history.pushState({}, '', '/articles')
+      history.pushState({}, '', '/articles/')
       window.dispatchEvent(new PopStateEvent('popstate'))
     })
     await waitFor(() => expect(screen.getByText('Jelajahi artikel')).toBeInTheDocument())
@@ -659,20 +659,18 @@ describe('Delcom Blog SPA (App.jsx)', () => {
     })
     await waitFor(() => expect(screen.getByText('Artikel tidak ditemukan.')).toBeInTheDocument())
 
-    act(() => {
-      history.pushState({}, '', '/posts/')
-      window.dispatchEvent(new PopStateEvent('popstate'))
-    })
-    await waitFor(() => expect(screen.getByText('Artikel tidak ditemukan.')).toBeInTheDocument())
-
-    // Hero CTA when logged out -> /register, then nav buttons
+    // Hero CTA when logged out -> /register, then nav buttons (Jelajahi -> /public, Artikel -> /articles, Brand -> /)
     fireEvent.click(screen.getByText('Jelajahi'))
+    await waitFor(() => expect(location.pathname).toBe('/public'))
+    fireEvent.click(screen.getByRole('button', { name: 'Artikel' }))
+    await waitFor(() => expect(location.pathname).toBe('/articles'))
     await waitFor(() => expect(screen.getByText('Mulai menulis ↗')).toBeInTheDocument())
     fireEvent.click(screen.getByText('Mulai menulis ↗'))
     expect(screen.getByText('Buat akun penulis')).toBeInTheDocument()
 
     // Brand logo click returns to '/'
     fireEvent.click(screen.getByText('BLOG'))
+    expect(location.pathname).toBe('/')
     expect(screen.getByText('Jelajahi artikel')).toBeInTheDocument()
   })
 

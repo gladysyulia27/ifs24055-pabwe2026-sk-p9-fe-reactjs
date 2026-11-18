@@ -108,7 +108,11 @@ export default function PublicArticleList({
                   </p>
                   <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">
                     <span className="text-slate-700 dark:text-slate-300">@{p.author?.username || 'Penulis'}</span>
-                    <span>{new Date(p.published_at || p.created_at).toLocaleDateString('id-ID')}</span>
+                    <div className="flex items-center gap-2">
+                      <span>{p.reading_time || 1} mnt baca</span>
+                      <span>·</span>
+                      <span>{new Date(p.published_at || p.created_at).toLocaleDateString('id-ID')}</span>
+                    </div>
                   </div>
                 </div>
               </article>

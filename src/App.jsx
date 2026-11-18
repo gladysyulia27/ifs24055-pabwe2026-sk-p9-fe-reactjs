@@ -9,17 +9,17 @@ import AiPostGeneratorModal from './features/blog/modals/AiPostGeneratorModal'
 
 export const SEEDER_ACCOUNTS = [
   {
-    label: 'Seeder Penulis',
-    username: 'penulis',
-    email: 'penulis@delcom.org',
-    password: 'password123',
+    label: 'writer',
+    username: 'writer',
+    email: 'writer@gmail.com',
+    password: 'password',
     role: 'member',
   },
   {
-    label: 'Seeder Admin',
+    label: 'admin',
     username: 'admin',
-    email: 'admin@delcom.org',
-    password: 'admin',
+    email: 'admin@gmail.com',
+    password: 'password',
     role: 'admin',
   },
 ]
@@ -85,12 +85,16 @@ export default function App() {
     }
   }
 
+  const cleanPath = path.length > 1 ? path.replace(/\/+$/, '') : path
   const isPublicPath =
-    path === '/' || path === '/public' || path === '/articles' || path === '/article'
+    cleanPath === '/' ||
+    cleanPath === '/public' ||
+    cleanPath === '/articles' ||
+    cleanPath === '/article'
 
   useEffect(() => {
     if (isPublicPath) loadPublic()
-  }, [isPublicPath, query, category])
+  }, [cleanPath, isPublicPath, query, category])
 
   async function loadAuthor() {
     try {
@@ -114,14 +118,17 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (path === '/author' && token) loadAuthor()
-    if (path === '/admin' && token && user?.role === 'admin') loadAdmin()
-    if ((path === '/author' || path === '/admin') && !token) go('/login')
-    if (path === '/admin' && token && user?.role !== 'admin') go('/author')
-  }, [path, token, user?.role])
+    if (cleanPath === '/author' && token) loadAuthor()
+    if (cleanPath === '/admin' && token && user?.role === 'admin') loadAdmin()
+    if ((cleanPath === '/author' || cleanPath === '/admin') && !token) go('/login')
+    if (cleanPath === '/admin' && token && user?.role !== 'admin') go('/author')
+  }, [cleanPath, token, user?.role])
 
   const publicDetail =
-    path.startsWith('/posts/') || path.startsWith('/articles/') || path.startsWith('/article/')
+    !isPublicPath &&
+    (cleanPath.startsWith('/posts/') ||
+      cleanPath.startsWith('/articles/') ||
+      cleanPath.startsWith('/article/'))
 
   useEffect(() => {
     if (!publicDetail) {
@@ -129,7 +136,7 @@ export default function App() {
       return
     }
     let active = true
-    const slug = decodeURIComponent(path.split('/')[2] || '')
+    const slug = decodeURIComponent(cleanPath.split('/')[2])
     setDetail(null)
     request(`/public/posts/${slug}`)
       .then((v) => {
@@ -141,7 +148,7 @@ export default function App() {
     return () => {
       active = false
     }
-  }, [path, publicDetail])
+  }, [cleanPath, publicDetail])
 
   function logout() {
     localStorage.removeItem('delcom_token')
@@ -204,7 +211,7 @@ export default function App() {
     }
   }
 
-  const isAuth = path === '/login' || path === '/register'
+  const isAuth = cleanPath === '/login' || cleanPath === '/register'
   const nav = (
     <StickyNavbar
       token={token}
@@ -235,32 +242,33 @@ export default function App() {
           <form
             onSubmit={(e) => {
               e.preventDefault()
-              auth(path === '/register' ? 'register' : 'login')
+              auth(cleanPath === '/register' ? 'register' : 'login')
             }}
             className="my-auto grid gap-5 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
             <div>
               <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">SELAMAT DATANG</p>
               <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">
-                {path === '/register' ? 'Buat akun penulis' : 'Masuk ke akun'}
+                {cleanPath === '/register' ? 'Buat akun penulis' : 'Masuk ke akun'}
               </h2>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                {path === '/register'
+                {cleanPath === '/register'
                   ? 'Mulai bagikan tulisan terbaikmu.'
                   : 'Lanjutkan mengelola dan menerbitkan artikel.'}
               </p>
             </div>
             <Field
               label="Username"
-              id={path === '/login' ? 'login-username' : undefined}
+              id={cleanPath === '/login' ? 'login-username' : 'register-username'}
               value={authForm.username}
               onChange={(e) => setAuthForm({ ...authForm, username: e.target.value })}
               required
               placeholder="username"
             />
-            {path === '/register' && (
+            {cleanPath === '/register' && (
               <Field
                 label="Email"
+                id="register-email"
                 type="email"
                 value={authForm.email}
                 onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })}
@@ -270,7 +278,7 @@ export default function App() {
             )}
             <Field
               label="Password"
-              id={path === '/login' ? 'login-password' : undefined}
+              id={cleanPath === '/login' ? 'login-password' : 'register-password'}
               type="password"
               value={authForm.password}
               onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })}
@@ -279,12 +287,12 @@ export default function App() {
             />
             <button
               type="submit"
-              id={path === '/login' ? 'login-submit' : undefined}
+              id={cleanPath === '/login' ? 'login-submit' : 'register-submit'}
               className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
             >
-              {path === '/register' ? 'Daftar akun' : 'Masuk'}
+              {cleanPath === '/register' ? 'Daftar akun' : 'Masuk'}
             </button>
-            {path === '/login' && (
+            {cleanPath === '/login' && (
               <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-3.5 text-xs dark:border-indigo-900/60 dark:bg-indigo-950/50">
                 <p className="mb-2 font-bold text-indigo-900 dark:text-indigo-200">
                   Akun Seeder Testing (Klik untuk isi otomatis):
@@ -304,13 +312,13 @@ export default function App() {
               </div>
             )}
             <p className="text-center text-sm text-slate-600 dark:text-slate-400">
-              {path === '/register' ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
+              {cleanPath === '/register' ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
               <button
                 type="button"
-                onClick={() => go(path === '/register' ? '/login' : '/register')}
+                onClick={() => go(cleanPath === '/register' ? '/login' : '/register')}
                 className="font-bold text-indigo-600 hover:underline dark:text-indigo-400"
               >
-                {path === '/register' ? 'Masuk' : 'Daftar'}
+                {cleanPath === '/register' ? 'Masuk' : 'Daftar'}
               </button>
             </p>
           </form>
@@ -322,7 +330,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#f8f9fc] text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       {nav}
-      {path === '/author' && (
+      {cleanPath === '/author' && (
         <AuthorDashboard
           posts={posts}
           stats={stats}
@@ -339,7 +347,7 @@ export default function App() {
           onDeletePost={deletePost}
         />
       )}
-      {path === '/admin' && (
+      {cleanPath === '/admin' && (
         <main className="mx-auto max-w-7xl px-5 py-10 text-slate-900 dark:text-slate-100">
           <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">ADMINISTRATION</p>
           <h1 className="mt-2 text-3xl font-black text-slate-900 dark:text-white">System overview</h1>
