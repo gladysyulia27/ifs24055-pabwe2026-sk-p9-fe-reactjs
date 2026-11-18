@@ -758,6 +758,19 @@ describe('Delcom Blog SPA (App.jsx)', () => {
       const u = String(url)
       const method = opts.method || 'GET'
 
+      if (u.endsWith('/auth/login')) {
+        const body = JSON.parse(opts.body)
+        if (body.username === 'penulis') {
+          return { ok: false, status: 401, json: async () => ({ status: 'fail', message: 'Belum terdaftar' }) }
+        }
+        return {
+          ok: true,
+          json: async () => ({
+            status: 'success',
+            data: { token: 'author-token', user: { id: 1, username: body.username, role: 'author' } },
+          }),
+        }
+      }
       if (u.endsWith('/auth/register')) {
         const body = JSON.parse(opts.body)
         if (body.username === 'failuser') {
@@ -848,10 +861,11 @@ describe('Delcom Blog SPA (App.jsx)', () => {
     })
     expect(window.alert).toHaveBeenCalledWith('Registrasi gagal')
 
-    // Successful registration redirects to /author
-    fireEvent.change(screen.getByPlaceholderText('username'), { target: { value: 'penulis' } })
+    // Successful registration / seeder login redirects to /author
+    fireEvent.click(screen.getAllByRole('button', { name: 'Masuk' })[1])
+    fireEvent.click(screen.getByText('Seeder Penulis (penulis)'))
     await act(async () => {
-      fireEvent.submit(screen.getByRole('button', { name: 'Daftar akun' }).closest('form'))
+      fireEvent.submit(document.getElementById('login-submit').closest('form'))
     })
     await waitFor(() => expect(screen.getByText('Ruang publikasi')).toBeInTheDocument())
     expect(screen.getByText('Post Draf')).toBeInTheDocument()

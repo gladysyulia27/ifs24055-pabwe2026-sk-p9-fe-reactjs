@@ -10,8 +10,9 @@ export default defineConfig({
         port: 5174,
         proxy: {
             '/api': {
-                target: 'http://localhost:8081',
+                target: 'https://ifs24055-pabwe2026-sk-p9-be-golang-gin.s1if.cloud',
                 changeOrigin: true,
+                secure: false,
             },
         },
     },

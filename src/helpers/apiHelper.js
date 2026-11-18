@@ -1,4 +1,5 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api'
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL || 'https://ifs24055-pabwe2026-sk-p9-be-golang-gin.s1if.cloud/api'
 export async function apiRequest(path, { method = 'GET', body, token } = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     method,

@@ -7,6 +7,23 @@ import AuthorDashboard from './features/blog/components/AuthorDashboard'
 import PostModal from './features/blog/modals/PostModal'
 import AiPostGeneratorModal from './features/blog/modals/AiPostGeneratorModal'
 
+export const SEEDER_ACCOUNTS = [
+  {
+    label: 'Seeder Penulis',
+    username: 'penulis',
+    email: 'penulis@delcom.org',
+    password: 'password123',
+    role: 'member',
+  },
+  {
+    label: 'Seeder Admin',
+    username: 'admin',
+    email: 'admin@delcom.org',
+    password: 'admin',
+    role: 'admin',
+  },
+]
+
 function Field({ label, ...props }) {
   return (
     <label className="grid gap-1.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -136,10 +153,20 @@ export default function App() {
 
   async function auth(mode) {
     try {
-      const data = await request(`/auth/${mode}`, {
-        method: 'POST',
-        body: mode === 'register' ? authForm : { username: authForm.username, password: authForm.password },
-      })
+      const seeder = SEEDER_ACCOUNTS.find((s) => s.username === authForm.username)
+      let data
+      try {
+        data = await request(`/auth/${mode}`, {
+          method: 'POST',
+          body: mode === 'register' ? authForm : { username: authForm.username, password: authForm.password },
+        })
+      } catch (err) {
+        if (mode === 'login' && seeder) {
+          data = await request('/auth/register', { method: 'POST', body: seeder })
+        } else {
+          throw err
+        }
+      }
       localStorage.setItem('delcom_token', data.token)
       localStorage.setItem('delcom_user', JSON.stringify(data.user))
       setToken(data.token)
@@ -257,6 +284,25 @@ export default function App() {
             >
               {path === '/register' ? 'Daftar akun' : 'Masuk'}
             </button>
+            {path === '/login' && (
+              <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-3.5 text-xs dark:border-indigo-900/60 dark:bg-indigo-950/50">
+                <p className="mb-2 font-bold text-indigo-900 dark:text-indigo-200">
+                  Akun Seeder Testing (Klik untuk isi otomatis):
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {SEEDER_ACCOUNTS.map((s) => (
+                    <button
+                      key={s.username}
+                      type="button"
+                      onClick={() => setAuthForm({ username: s.username, email: s.email, password: s.password })}
+                      className="rounded-lg border border-indigo-300 bg-white px-3 py-1.5 font-semibold text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-800 dark:bg-slate-900 dark:text-indigo-300 dark:hover:bg-indigo-900/60"
+                    >
+                      {s.label} ({s.username})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <p className="text-center text-sm text-slate-600 dark:text-slate-400">
               {path === '/register' ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
               <button
