@@ -102,17 +102,8 @@ export default function App() {
       setPosts(p || [])
       setStats(s || {})
     } catch (e) {
-      // Backend unreachable or token invalid — load local fallback data, never logout
-      try {
-        const raw = localStorage.getItem('delcom_fallback_posts')
-        const fb = raw ? JSON.parse(raw) : []
-        const pub = fb.filter((x) => x.is_published).length
-        setPosts(fb)
-        setStats({ total: fb.length, published: pub, draft: fb.length - pub })
-      } catch (_) {
-        setPosts([])
-        setStats({ total: 0, published: 0, draft: 0 })
-      }
+      alert(e.message)
+      logout()
     }
   }
 
@@ -122,20 +113,7 @@ export default function App() {
       setUsers(u || [])
       setAdminPosts(p || [])
     } catch (e) {
-      // Backend unreachable — show fallback data for admin panel
-      try {
-        const raw = localStorage.getItem('delcom_fallback_posts')
-        const fb = raw ? JSON.parse(raw) : []
-        const pub = fb.filter((x) => x.is_published).length
-        setAdminPosts(fb)
-        setUsers([
-          { id: 1, username: 'admin', email: 'admin@gmail.com', role: 'admin', total_posts: 0, published_posts: 0 },
-          { id: 2, username: 'writer', email: 'writer@gmail.com', role: 'member', total_posts: fb.length, published_posts: pub },
-        ])
-      } catch (_) {
-        setAdminPosts([])
-        setUsers([])
-      }
+      alert(e.message)
     }
   }
 
@@ -191,16 +169,7 @@ export default function App() {
         })
       } catch (err) {
         if (mode === 'login' && seeder) {
-          try {
-            data = await request('/auth/register', { method: 'POST', body: seeder })
-          } catch (_) {
-            // Both login & register failed (backend completely down) — offline session
-            const role = seeder.username === 'admin' ? 'admin' : 'member'
-            data = {
-              token: `seeder-jwt-token-${seeder.username}`,
-              user: { id: role === 'admin' ? 1 : 2, username: seeder.username, email: seeder.email, role },
-            }
-          }
+          data = await request('/auth/register', { method: 'POST', body: seeder })
         } else {
           throw err
         }
@@ -258,7 +227,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
         {nav}
-        <div className="mx-auto grid max-w-5xl gap-10 px-5 py-16 md:grid-cols-2">
+        <main className="mx-auto grid max-w-5xl gap-10 px-5 py-16 md:grid-cols-2">
           <div className="hidden rounded-3xl bg-gradient-to-br from-indigo-700 to-slate-950 p-10 text-white shadow-xl md:block">
             <p className="text-sm font-bold uppercase tracking-widest text-indigo-200">Delcom Blog</p>
             <h1 className="mt-10 text-5xl font-black leading-tight text-white">
@@ -353,7 +322,7 @@ export default function App() {
               </button>
             </p>
           </form>
-        </div>
+        </main>
       </div>
     )
   }

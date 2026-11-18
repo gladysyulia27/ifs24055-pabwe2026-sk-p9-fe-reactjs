@@ -41,9 +41,9 @@ export default function AuthorDashboard({
       <PostStats stats={stats} />
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <div className="border-b border-slate-200 p-5 font-bold text-slate-900 dark:border-slate-800 dark:text-white">
+        <h2 className="border-b border-slate-200 p-5 font-bold text-slate-900 dark:border-slate-800 dark:text-white">
           Artikel saya <span className="ml-2 text-sm font-normal text-slate-500 dark:text-slate-400">{posts.length} artikel</span>
-        </div>
+        </h2>
         {posts.length === 0 ? (
           <div className="p-14 text-center">
             <p className="font-bold text-slate-900 dark:text-white">Belum ada artikel</p>
@@ -90,7 +90,7 @@ export default function AuthorDashboard({
                   <button
                     type="button"
                     onClick={() => onDeletePost(p.id)}
-                    className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/80 dark:text-rose-300 dark:hover:bg-rose-900/60"
+                    className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/80 dark:text-rose-300 dark:hover:bg-rose-900/60"
                   >
                     Hapus
                   </button>
