@@ -12,13 +12,13 @@ export default function PostStats({ stats }) {
       {items.map(([label, value, icon]) => (
         <div
           key={label}
-          className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
+          className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
         >
-          <div className="flex justify-between text-sm text-slate-500">
+          <div className="flex items-center justify-between text-sm font-medium text-slate-600 dark:text-slate-400">
             <span>{label}</span>
-            <span>{icon}</span>
+            <span className="text-indigo-600 dark:text-indigo-400">{icon}</span>
           </div>
-          <p className="mt-3 text-3xl font-black">{value}</p>
+          <p className="mt-3 text-3xl font-black text-slate-900 dark:text-white">{value}</p>
         </div>
       ))}
     </div>
